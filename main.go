@@ -90,17 +90,12 @@ func enable(api *slack.Client, statusText string, statusEmoji string) {
 		minutes = 20
 	)
 
-	res, err := api.SetSnooze(minutes)
+	_, err := api.SetSnooze(minutes)
 
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		os.Exit(1)
 	}
-
-	fmt.Printf("Enabled: %t, StartTime: %b, EndTime: %b\n",
-		res.Enabled,
-		res.NextStartTimestamp,
-		res.NextEndTimestamp)
 }
 
 func disable(api *slack.Client, statusText string, statusEmoji string) {
@@ -113,6 +108,4 @@ func disable(api *slack.Client, statusText string, statusEmoji string) {
 		fmt.Printf("%s\n", err)
 		os.Exit(1)
 	}
-
-	fmt.Println("DND macOS status disabled")
 }
