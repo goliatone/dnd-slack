@@ -65,8 +65,7 @@ func main() {
 		command = disableCmd
 		action = disable
 	default:
-		flag.PrintDefaults()
-		os.Exit(1)
+		usage()
 	}
 
 	token = command.String("token", defaults.token, "Slack API auth <token>.")
@@ -85,7 +84,7 @@ func main() {
 //that should be managed externally.
 func enable(api *slack.Client, statusText string, statusEmoji string) {
 	if err := api.SetUserCustomStatus(statusText, statusEmoji); err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Fprintf(os.Stderr, "error: could not set user status: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -96,7 +95,7 @@ func enable(api *slack.Client, statusText string, statusEmoji string) {
 	_, err := api.SetSnooze(minutes)
 
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Fprintf(os.Stderr, "error: could not set snooze: %s\n", err)
 		os.Exit(1)
 	}
 }
@@ -107,12 +106,12 @@ func enable(api *slack.Client, statusText string, statusEmoji string) {
 //that should be managed externally.
 func disable(api *slack.Client, statusText string, statusEmoji string) {
 	if err := api.EndDND(); err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Fprintf(os.Stderr, "error: could not end DND status: %s\n", err)
 		os.Exit(1)
 	}
 
 	if err := api.SetUserCustomStatus(statusEmoji, statusEmoji); err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Fprintf(os.Stderr, "error: could not set user status: %s\n", err)
 		os.Exit(1)
 	}
 }
