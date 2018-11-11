@@ -68,9 +68,9 @@ func main() {
 		usage()
 	}
 
-	token = command.String("token", defaults.token, "Slack API auth <token>.")
-	text = command.String("status-text", defaults.text, "Slack status text.")
-	emoji = command.String("status-emoji", defaults.emoji, "Slack status emoji.")
+	command.StringVar(token, "token", defaults.token, "Slack API auth token")
+	command.StringVar(text, "status-text", defaults.text, "Slack status text")
+	command.StringVar(emoji, "status-emoji", defaults.emoji, "Slack status emoji")
 
 	command.Parse(os.Args[2:])
 
