@@ -8,28 +8,44 @@ import (
 	"github.com/nlopes/slack"
 )
 
+const (
+	enableCmd  = "enable"
+	disableCmd = "disable"
+)
+
+var token *string
+var text *string
+var emoji *string
+
 func main() {
-	// Subcommands
-	flowCommand := flag.NewFlagSet("flow", flag.ExitOnError)
-	inactiveCommand := flag.NewFlagSet("list", flag.ExitOnError)
 
-	token := flowCommand.String("token", "", "Slack API auth <token>.")
-	statusText := flowCommand.String("status-text", "I'm flowing", "Slack status text.")
-	emoji := flowCommand.String("status-emoji", ":octagonal_sign:", "Slack status emoji.")
+	flowCommand := flag.NewFlagSet(enableCmd, flag.ExitOnError)
+	inactiveCommand := flag.NewFlagSet(disableCmd, flag.ExitOnError)
 
-	if len(os.Args) == 1 {
+	var Usage = func() {
+		fmt.Println("Utility to toggle Slack Do Not Disturb using notification center")
+		fmt.Fprintf(os.Stderr, "Usage: %s [subcommand] {enable|disable}\n", os.Args[0])
 		flag.PrintDefaults()
-		flowCommand.PrintDefaults()
-		inactiveCommand.PrintDefaults()
 		os.Exit(0)
 	}
 
+	flag.Parse()
+
+	if len(flag.Args()) == 0 {
+		Usage()
+	}
+
 	switch os.Args[1] {
-	case "flow":
+	case enableCmd:
+		token = flowCommand.String("token", "", "Slack API auth <token>.")
+		text = flowCommand.String("status-text", "I'm flowing", "Slack status text.")
+		emoji = flowCommand.String("status-emoji", ":octagonal_sign:", "Slack status emoji.")
 		flowCommand.Parse(os.Args[2:])
-	case "inactive":
+	case disableCmd:
+		token = inactiveCommand.String("token", "", "Slack API auth <token>.")
+		text = inactiveCommand.String("status-text", "", "Slack status text.")
+		emoji = inactiveCommand.String("status-emoji", "", "Slack status emoji.")
 		inactiveCommand.Parse(os.Args[2:])
-		fmt.Print("inactive execute")
 	default:
 		flag.PrintDefaults()
 		os.Exit(1)
@@ -39,15 +55,15 @@ func main() {
 	api := slack.New(*token)
 
 	if flowCommand.Parsed() {
-		flow(api, *statusText, *emoji)
+		enable(api, *text, *emoji)
 	}
 
 	if inactiveCommand.Parsed() {
-		inactive(api, "", "")
+		disable(api, *text, *emoji)
 	}
 }
 
-func flow(api *slack.Client, statusText string, statusEmoji string) {
+func enable(api *slack.Client, statusText string, statusEmoji string) {
 	if err := api.SetUserCustomStatus(statusText, statusEmoji); err != nil {
 		fmt.Printf("%s\n", err)
 		os.Exit(1)
@@ -70,7 +86,7 @@ func flow(api *slack.Client, statusText string, statusEmoji string) {
 		snoozeResponse.NextEndTimestamp)
 }
 
-func inactive(api *slack.Client, statusText string, statusEmoji string) {
+func disable(api *slack.Client, statusText string, statusEmoji string) {
 	if err := api.EndDND(); err != nil {
 		fmt.Printf("%s\n", err)
 		os.Exit(1)
@@ -81,5 +97,5 @@ func inactive(api *slack.Client, statusText string, statusEmoji string) {
 		os.Exit(1)
 	}
 
-	fmt.Print("DND status disabled!")
+	fmt.Println("DND macOS status disabled")
 }
