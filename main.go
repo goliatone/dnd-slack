@@ -80,6 +80,9 @@ func main() {
 	action(api, *text, *emoji)
 }
 
+//enable DND: this will set snooze for the user and update status text and emoji
+//Note that we are currently not storing the previous status,
+//that should be managed externally.
 func enable(api *slack.Client, statusText string, statusEmoji string) {
 	if err := api.SetUserCustomStatus(statusText, statusEmoji); err != nil {
 		fmt.Printf("%s\n", err)
@@ -98,6 +101,10 @@ func enable(api *slack.Client, statusText string, statusEmoji string) {
 	}
 }
 
+//disable DND: this remove snooze for the user and set status text and emoji
+//to empty.
+//Note that we are currently not storing the previous status,
+//that should be managed externally.
 func disable(api *slack.Client, statusText string, statusEmoji string) {
 	if err := api.EndDND(); err != nil {
 		fmt.Printf("%s\n", err)
